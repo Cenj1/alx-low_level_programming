@@ -1,135 +1,225 @@
-#include "main.h"
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
+
+int _strlen(char *s);
+char *xarray(int size);
+char *_zero_iteration(char *s);
+int convert_to_digit(char s);
+void _product(char *prod, char *mul, int digit, int zeroes);
+void nums_add(char *final_prod, char *next_prod, int next_len);
 
 /**
- * _memset - fills memory with a constant byte
+ *_strlen - length of string
  *
- * @s: input pointer that represents memory block
- *     to fill
- * @b: characters to fill/set
- * @n: number of bytes to be filled
+ *@s:string
  *
- * Return: pointer to the filled memory area
-*/
-
-char *_memset(char *s, char b, unsigned int n)
+ *Return:string length
+ *
+ */
+int _strlen(char *s)
 {
-	unsigned int i = 0;
+	int i;
 
-	while (i < n)
+	for (i = 0; s[i] != '\0'; i++)
+		;
+	return (i);
+}
+/**
+ *xarray - creates an array and initializes its value to x plus terminating
+ *null byte
+ *@size:size of array to be initialised
+ *Return:pointer to array
+ */
+char *xarray(int size)
+{
+	int i;
+	char *arr;
+
+	arr = malloc(sizeof(char) * size);
+	if (arr == NULL)
 	{
-		s[i] = b;
-		i++;
+		exit(98);
+	}
+	for (i = 0; i < (size - 1); i++)
+	{
+		arr[i] = 'x';
+	}
+	arr[i] = '\0';
+	return (arr);
+}
+/**
+ *_zero_iteration - iterates thru a given no. of zeroes
+ *
+ *@s:string to be iterated
+ *Return:pointer to next non-zero element
+ */
+char *_zero_iteration(char *s)
+{
+	while (*s && *s == '0')
+	{
+		s++;
 	}
 	return (s);
 }
-
 /**
- * _calloc - function that allocates memory
- *           for an array using memset
+ *convert_to_digit - converts digit character to int
  *
- * @nmemb: size of array
- * @size: size of each element
+ *@s:digit character
  *
- * Return: pointer to new allocated memory
-*/
-
-void *_calloc(unsigned int nmemb, unsigned int size)
+ *Return:converted int
+ *
+ */
+int convert_to_digit(char s)
 {
-	char *ptr;
+	int digit = s - '0';
 
-	if (nmemb == 0 || size == 0)
-		return (NULL);
-	ptr = malloc(nmemb * size);
-	if (ptr == NULL)
-		return (NULL);
-	_memset(ptr, 0, nmemb * size);
-
-	return (ptr);
-}
-
-
-/**
- * multiply - initialize array with 0 byte
- *
- * @s1: string 1
- * @s2: string 2
- *
- * Return: nothing
-*/
-
-void multiply(char *s1, char *s2)
-{
-	int i, l1, l2, total_l, f_digit, s_digit, res = 0, tmp;
-	char *ptr;
-	void *temp;
-
-	l1 = _length(s1);
-	l2 = _length(s2);
-	tmp = l2;
-	total_l = l1 + l2;
-	ptr = _calloc(sizeof(int), total_l);
-
-	/* store our pointer address to free later */
-	temp = ptr;
-
-	for (l1--; l1 >= 0; l1--)
+	if (digit < 0 || digit > 9)
 	{
-		f_digit = s1[l1] - '0';
-		res = 0;
-		l2 = tmp;
-		for (l2--; l2 >= 0; l2--)
+		printf("Error\n");
+		exit(98);
+	}
+	return (digit);
+}
+/**
+ *_product - multiplies string of numbers by a single digit
+ *
+ *@prod:buffer to store result
+ *@mul:string of no.
+ *@digit:single digit
+ *@zeroes:leading zeroes
+ *
+ *Return:void
+ */
+void _product(char *prod, char *mul, int digit, int zeroes)
+{
+	int mul_len, num, tens = 0;
+
+	mul_len = _strlen(mul) - 1;
+	mul += mul_len;
+
+	while (*prod)
+	{
+		*prod = 'x';
+		prod++;
+	}
+	prod--;
+
+	while (zeroes--)
+	{
+		*prod = '0';
+		prod--;
+	}
+	for (; mul_len >= 0; mul_len--, prod--, mul--)
+	{
+		if (*mul < '0' || *mul > '9')
 		{
-			s_digit = s2[l2] - '0';
-			res += ptr[l2 + l1 + 1] + (f_digit * s_digit);
-			ptr[l1 + l2 + 1] = res % 10;
-			res /= 10;
+			printf("Error\n");
+			exit(98);
 		}
-		if (res)
-			ptr[l1 + l2 + 1] = res % 10;
+		num = (*mul - '0') * digit;
+		num += tens;
+		*prod = (num % 10) + '0';
+		tens = num / 10;
 	}
-
-	while (*ptr == 0)
+	if (tens)
 	{
-		ptr++;
-		total_l--;
+		*prod = (tens % 10) + '0';
 	}
-
-	for (i = 0; i < total_l; i++)
-		printf("%i", ptr[i]);
-	printf("\n");
-	printf("\n");
-	free(temp);
 }
-
-
 /**
- * main - Entry point
+ *nums_add - adds numbers stored in two strings
  *
- * Description: a program that multiplies
- *            two positive numbers
+ *@final_prod:final product buffer
+ *@next_prod :next product to be added
+ *@next_len:length of next prod
  *
- * @argc: number of arguments
- * @argv: arguments array
- *
- * Return: 0 on success 98 on faliure
-*/
+ *Return:void
+ */
+void nums_add(char *final_prod, char *next_prod, int next_len)
+{
+	int num, tens;
 
+	tens = 0;
+	while (*(final_prod + 1))
+	{
+		final_prod++;
+	}
+	while (*(next_prod + 1))
+	{
+		next_prod++;
+	}
+	for (; *final_prod != 'x'; final_prod--)
+	{
+		num = (*final_prod - '0') + (*next_prod - '0');
+		num += tens;
+		*final_prod = (num % 10) + '0';
+		tens = num / 10;
+		next_prod--;
+		next_len--;
+	}
+	for (; next_len >= 0 && *next_prod != 'x'; next_len--)
+	{
+		num = (*next_prod - '0');
+		num += tens;
+		*final_prod = (num % 10) + '0';
+		tens = num / 10;
+		final_prod--;
+		next_prod--;
+	}
+	if (tens)
+	{
+		*final_prod = (tens % 10) + '0';
+	}
+}
+/**
+ *main - multiplies two positive numbers and prints the result
+ *
+ *@argc:arguement count
+ *@argv:arguement vector
+ *Return:(0- success)
+ */
 int main(int argc, char *argv[])
 {
-	char *n1 = argv[1];
-	char *n2 = argv[2];
+	char *final_prod, *next_prod;
+	int i, size, digit, zeroes = 0;
 
-	if (argc != 3 || check_number(n1) || check_number(n2))
-		error_exit();
-
-	if (*n1 == '0' || *n2 == '0')
+	if (argc != 3)
 	{
-		_putchar('0');
-		_putchar('\n');
+		printf("Error\n");
+		exit(98);
 	}
-	else
-		multiply(n1, n2);
+	if (*(argv[1]) == '0')
+	{
+		argv[1] = _zero_iteration(argv[1]);
+	}
+	if (*(argv[2]) == '0')
+	{
+		argv[2] = _zero_iteration(argv[2]);
+	}
+	if (*(argv[1]) == '\0' || *(argv[2]) == '\0')
+	{
+		printf("0\n");
+		return (0);
+	}
+	size = _strlen(argv[1]) + _strlen(argv[2]);
+	final_prod = xarray(size + 1);
+	next_prod = xarray(size + 1);
+
+	for (i = _strlen(argv[2]) - 1; i >= 0; i--)
+	{
+		digit = convert_to_digit(*(argv[2] + i));
+		_product(next_prod, argv[1], digit, zeroes++);
+		nums_add(final_prod, next_prod, size - 1);
+	}
+	for (i = 0; final_prod[i]; i++)
+	{
+		if (final_prod[i] != 'x')
+		{
+			putchar(final_prod[i]);
+		}
+	}
+	putchar('\n');
+	free(next_prod);
+	free(final_prod);
 	return (0);
 }
